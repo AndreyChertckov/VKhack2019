@@ -35,7 +35,7 @@ class Log(models.Model):
 
     @property
     def before(self):
-        current = self.user.clock
+        current = self.user.clock.time
         for log in self.user.logs:
             if log.time > self.time:
                 if log.action.time_effect > 0:
@@ -76,8 +76,35 @@ class WeeklyLog(models.Model):
     def weekly_log(self):
         current = datetime.date.today()
         week = {}
+        for i in range(0, 7):
+            week[(current - datetime.timedelta(days=(i + 1)))] = [0, 0]
+        for day in week:
+            for log in self.user.logs:
+                if log.time.date() == day:
+                    if log.action.time_effect > 0:
+                        week[day][0] += log.action.time_effect
+                    else:
+                        week[day][1] += log.action.time_effect
+        return week
 
 
+class MonthlyLog(models.Model):
+    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='monthly_log')
+
+    @property
+    def monthly_log(self):
+        current = datetime.date.today()
+        month = {}
+        for i in range(0, 30):
+            month[(current - datetime.timedelta(days=(i + 1)))] = [0, 0]
+        for day in month:
+            for log in self.user.logs:
+                if log.time.date() == day:
+                    if log.action.time_effect > 0:
+                        month[day][0] += log.action.time_effect
+                    else:
+                        month[day][1] += log.action.time_effect
+        return month
 
 
 class Fact(models.Model):
