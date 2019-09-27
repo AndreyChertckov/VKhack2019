@@ -23,14 +23,14 @@ def user_logs(request):
         return HttpResponse(status=404)
 
 @api_view(['GET'])
-def action_list(parameter_list):
+def action_list(request):
     try:
         user = User.objects.get(pk=request.COOKIES.get('token'))
     except:
         return HttpResponse(status=404)
 
 @api_view(['GET', 'POST'])
-def action_details():
+def action_details(request):
     try:
         user = User.objects.get(pk=request.COOKIES.get('token'))
     except:
@@ -51,11 +51,11 @@ def user_monthly_logs(request):
         return HttpResponse(status=404)
 
 @api_view(['GET'])
-def random_fact():
+def random_fact(request):
     pass
 
 @api_view(['GET'])
-def random_fact_by_time():
+def random_fact_by_time(request):
     try:
         user = User.objects.get(pk=request.COOKIES.get('token'))
     except:
