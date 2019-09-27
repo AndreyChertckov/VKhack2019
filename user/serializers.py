@@ -6,7 +6,10 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id']
+        fields = ['name']
+
+    def create(self, validated_data):
+        return User.objects.create(**validated_data)
 
 
 class ClockSerializer(serializers.ModelSerializer):

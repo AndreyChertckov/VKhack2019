@@ -9,12 +9,11 @@ from user.serializers import UserSerializer
 @parser_classes([JSONParser])
 def create_user(request):
     data = JSONParser().parse(request)
-    user = User()
-    user.name = data["name"]
-    user.save()
-    response = HttpResponse()
-    response.set_cookie('token', user.pk)
-    return response
+    serializer = UserSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save()
+        return JsonResponse(serializer.data, status=201)
+    return JsonResponse(serializer.errors, status=400)
 
 @api_view(['GET'])
 def user_clock(request):

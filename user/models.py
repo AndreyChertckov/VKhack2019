@@ -4,7 +4,7 @@ import datetime
 
 
 class User(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, default="Arina")
     clock = models.ForeignKey('Clock', on_delete=models.CASCADE, related_name='user')
 
     def create(self):
@@ -16,11 +16,11 @@ class Clock(models.Model):
 
     @property
     def daily_minus(self):
-        return filter(lambda x: x.action.time_effect < 0, self.logs)
+        return filter(lambda x: x.action.time_effect < 0, self.user.logs)
 
     @property
     def daily_plus(self):
-        return filter(lambda x: x.action.time_effect > 0, self.logs)
+        return filter(lambda x: x.action.time_effect > 0, self.user.logs)
 
 
 class Action(models.Model):
