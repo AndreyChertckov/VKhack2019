@@ -118,3 +118,4 @@ venv.bak/
 
 #intellij
 .idea/
+.idea/workspace.xml
