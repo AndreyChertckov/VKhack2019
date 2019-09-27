@@ -51,6 +51,30 @@ class Log(models.Model):
         self.save()
 
 
+class UserAction(models.Model):
+    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='user_actions')
+    action = models.ForeignKey(Action, null=True, on_delete=models.CASCADE, related_name='user_actions')
+
+    @property
+    def usage_frequency(self):
+        n = 0
+        for log in self.user.logs:
+            if log.action.id == self.action.id:
+                n += 1
+        return n
+
+
+class WeeklyLog(models.Model):
+    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='weekly_log')
+
+    @property
+    def weekly_log(self):
+        current = datetime.date.today()
+        week = {}
+
+
+
+
 class Fact(models.Model):
     description = models.TextField()
     appearance_time = models.TimeField()
