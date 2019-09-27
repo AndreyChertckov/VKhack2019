@@ -4,7 +4,14 @@ import datetime
 
 
 class User(models.Model):
-    clock = models.TimeField()
+    clock = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
+
+    def create(self):
+        self.save()
+
+
+class Clock(models.Model):
+    time = models.TimeField()
 
     @property
     def daily_minus(self):
@@ -13,9 +20,6 @@ class User(models.Model):
     @property
     def daily_plus(self):
         return filter(lambda x: x.action.time_effect > 0, self.logs)
-
-    def create(self):
-        self.save()
 
 
 class Action(models.Model):
