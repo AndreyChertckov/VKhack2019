@@ -7,7 +7,9 @@ class User(models.Model):
     name = models.CharField(max_length=200, default="Arina")
     clock = models.ForeignKey('Clock', on_delete=models.CASCADE, related_name='user')
 
-    def create(self):
+    def create(self, data):
+        self.name = data['name']
+        self.clock = data['clock']
         self.save()
 
 
@@ -16,11 +18,15 @@ class Clock(models.Model):
 
     @property
     def daily_minus(self):
-        return filter(lambda x: x.action.time_effect < 0, self.user.logs)
+        return self.user.first().logs.filter(action__time_effect__lt=0).aggregate(daily_minus=models.Sum('action__time_effect'))['daily_minus']
 
     @property
     def daily_plus(self):
-        return filter(lambda x: x.action.time_effect > 0, self.user.logs)
+        return self.user.first().logs.filter(action__time_effect__gt=0).aggregate(daily_plus=models.Sum('action__time_effect'))['daily_plus']
+
+    def create(self, data):
+        self.time = data['time']
+        self.save()
 
 
 class Action(models.Model):
