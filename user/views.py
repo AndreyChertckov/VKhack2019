@@ -1,9 +1,20 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from rest_framework.parsers import JSONParser
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, parser_classes
 from user.models import User
 from user.serializers import UserSerializer
+
+@api_view(['POST'])
+@parser_classes([JSONParser])
+def create_user(request):
+    data = JSONParser().parse(request)
+    user = User()
+    user.name = data["name"]
+    user.save()
+    response = HttpResponse()
+    response.set_cookie('token', user.pk)
+    return response
 
 @api_view(['GET'])
 def user_clock(request):

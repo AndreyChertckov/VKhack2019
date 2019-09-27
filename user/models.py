@@ -4,7 +4,8 @@ import datetime
 
 
 class User(models.Model):
-    clock = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
+    name = models.CharField(max_length=200)
+    clock = models.ForeignKey('Clock', on_delete=models.CASCADE, related_name='user')
 
     def create(self):
         self.save()
