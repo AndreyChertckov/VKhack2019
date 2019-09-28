@@ -2,16 +2,6 @@ from rest_framework import serializers
 from user.models import User, Clock, Action, Log, UserAction, Fact
 
 
-class UserSerializer(serializers.ModelSerializer):
-    clock = serializers.PrimaryKeyRelatedField(queryset=Clock.objects.all())
-    class Meta:
-        model = User
-        fields = ['id', 'name', 'clock']
-
-    def create(self, validated_data):
-        return User.objects.create(**validated_data)
-
-
 class ClockSerializer(serializers.ModelSerializer):
     daily_minus = serializers.ReadOnlyField()
     daily_plus = serializers.ReadOnlyField()
@@ -21,6 +11,16 @@ class ClockSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return Clock.objects.create(**validated_data)
+
+
+class UserSerializer(serializers.ModelSerializer):
+    clock = ClockSerializer(allow_null=True)
+    class Meta:
+        model = User
+        fields = ['id', 'name', 'clock', 'token', 'drinking', 'smoking']
+
+    def create(self, validated_data):
+        return User.objects.create(**validated_data)
 
 
 class ActionSerializer(serializers.ModelSerializer):

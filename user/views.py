@@ -2,8 +2,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from django.db.models.functions import TruncDate
 from rest_framework.parsers import JSONParser
-from rest_framework.decorators import api_view, parser_classes
-from user.models import User, Log, Action, Fact
+from rest_framework.decorators import api_view
+from user.models import User, Clock, Log, Action, Fact
 from user.serializers import UserSerializer, ClockSerializer, LogSerializer, ActionSerializer, UserActionSerializer, FactSerializer
 import datetime
 from django.db.models import Sum, Q
@@ -12,9 +12,9 @@ import math
 
 
 @api_view(['GET'])
-@parser_classes([JSONParser])
 def create_empty_user(request):
-    serializer = UserSerializer(data='')
+    data = {'name': '', 'clock': None, 'token': '', 'drinking': False, 'smoking': False}
+    serializer = UserSerializer(data=data)
 
     if serializer.is_valid():
         serializer.save()
@@ -24,16 +24,23 @@ def create_empty_user(request):
 
 
 @api_view(['POST'])
-@parser_classes([JSONParser])
-def create_user(request):
-    data = JSONParser().parse(request)
+def create_user_clock(request, user_id):
+    try:
+        user = User.objects.get(pk=user_id)
+    except:
+        return HttpResponse(status=404)
+    received_data = JSONParser().parse(request)
+    user_data = UserSerializer(user).data
+    # overwrite the fields by received data
+    for i in received_data.keys():
+        user[i] = received_data[i]
 
-    clock_ser = ClockSerializer(data={'time': initial_time(data)})
+    clock_ser = ClockSerializer(data={'time': initial_time(received_data)})
     if clock_ser.is_valid():
         clock = clock_ser.save()
         data['clock'] = clock.pk
 
-        serializer = UserSerializer(data=data['name'])
+        serializer = UserSerializer(data=user_data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=201)
@@ -43,7 +50,6 @@ def create_user(request):
 
 
 @api_view(['GET'])
-@parser_classes([JSONParser])
 def add_token(request, token):
     try:
         user = User.objects.get(pk=request.GET.get('token'))
@@ -142,7 +148,10 @@ def commit_action(request, action_id):
     user.clock.save()
     log.save()
     action.users.add(user)
-    return JsonResponse({'status': 'ok'})
+    donate = False
+    if user.clock.time.replace(tzinfo=None) > datetime.time(23, 0).replace(tzinfo=None):
+        donate = True
+    return JsonResponse({'status': 'ok', 'donate': donate})
 
 
 @api_view(['GET'])
