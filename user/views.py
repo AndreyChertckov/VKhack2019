@@ -27,7 +27,7 @@ def create_user(request):
 @api_view(['GET'])
 def user_clock(request):
     try:
-        user = User.objects.get(pk=request.COOKIES.get('token'))
+        user = User.objects.get(pk=request.GET.get('token'))
     except:
         return HttpResponse(status=404)
 
@@ -37,35 +37,35 @@ def user_clock(request):
 @api_view(['GET'])
 def user_logs(request):
     try:
-        user = User.objects.get(pk=request.COOKIES.get('token'))
+        user = User.objects.get(pk=request.GET.get('token'))
     except:
         return HttpResponse(status=404)
 
 @api_view(['GET'])
 def action_list(request):
     try:
-        user = User.objects.get(pk=request.COOKIES.get('token'))
+        user = User.objects.get(pk=request.GET.get('token'))
     except:
         return HttpResponse(status=404)
 
 @api_view(['GET', 'POST'])
 def action_details(request):
     try:
-        user = User.objects.get(pk=request.COOKIES.get('token'))
+        user = User.objects.get(pk=request.GET.get('token'))
     except:
         return HttpResponse(status=404)
 
 @api_view(['GET'])
 def user_weekly_logs(request):
     try:
-        user = User.objects.get(pk=request.COOKIES.get('token'))
+        user = User.objects.get(pk=request.GET.get('token'))
     except:
         return HttpResponse(status=404)
 
 @api_view(['GET'])
 def user_monthly_logs(request):
     try:
-        user = User.objects.get(pk=request.COOKIES.get('token'))
+        user = User.objects.get(pk=request.GET.get('token'))
     except:
         return HttpResponse(status=404)
 
@@ -76,6 +76,6 @@ def random_fact(request):
 @api_view(['GET'])
 def random_fact_by_time(request):
     try:
-        user = User.objects.get(pk=request.COOKIES.get('token'))
+        user = User.objects.get(pk=request.GET.get('token'))
     except:
         return HttpResponse(status=404)
