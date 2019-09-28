@@ -4,11 +4,11 @@ import datetime
 
 
 class User(models.Model):
-    name = models.CharField(max_length=200, default="Arina")
-    token = models.CharField(default='')
-    smoke = models.BooleanField()
-    alcohol = models.BooleanField()
-    clock = models.ForeignKey('Clock', on_delete=models.CASCADE, related_name='user')
+    name = models.CharField(max_length=200, null=True)
+    token = models.CharField(null=True)
+    smoke = models.BooleanField(null=True)
+    alcohol = models.BooleanField(null=True)
+    clock = models.ForeignKey('Clock', null=True, on_delete=models.CASCADE, related_name='user')
 
     def create(self, data):
         self.name = data['name']

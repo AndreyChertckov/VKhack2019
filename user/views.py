@@ -11,6 +11,18 @@ from django.template import Template
 import math
 
 
+@api_view(['GET'])
+@parser_classes([JSONParser])
+def create_empty_user(request):
+    serializer = UserSerializer(data='')
+
+    if serializer.is_valid():
+        serializer.save()
+        return JsonResponse(serializer.data, status=201)
+
+    return JsonResponse(serializer.errors, status=400)
+
+
 @api_view(['POST'])
 @parser_classes([JSONParser])
 def create_user(request):
@@ -30,7 +42,7 @@ def create_user(request):
     return JsonResponse(clock_ser.errors, status=400)
 
 
-@api_view(['POST'])
+@api_view(['GET'])
 @parser_classes([JSONParser])
 def add_token(request, token):
     try:
@@ -43,6 +55,7 @@ def add_token(request, token):
 
     template = Template('Success. Token saved.')
     return template.render()
+
 
 def initial_time(user_data):
     index = 0
