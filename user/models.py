@@ -19,11 +19,11 @@ class Clock(models.Model):
 
     @property
     def daily_minus(self):
-        return self.user.first().logs.filter(action__time_effect__lt=0).aggregate(daily_minus=models.Sum('action__time_effect'))['daily_minus']
+        return self.user.first().logs.filter(action__time_effect__lt=0, time__date=datetime.date.today()).aggregate(daily_minus=models.Sum('action__time_effect'))['daily_minus']
 
     @property
     def daily_plus(self):
-        return self.user.first().logs.filter(action__time_effect__gt=0).aggregate(daily_plus=models.Sum('action__time_effect'))['daily_plus']
+        return self.user.first().logs.filter(action__time_effect__gt=0, time__date=datetime.date.today()).aggregate(daily_plus=models.Sum('action__time_effect'))['daily_plus']
 
     def create(self, data):
         self.time = data['time']
