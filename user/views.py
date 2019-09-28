@@ -9,6 +9,8 @@ import datetime
 from django.db.models import Sum, Q
 from django.template import Template
 import math
+from urllib.request import urlopen
+import json
 
 
 @api_view(['GET'])
@@ -62,6 +64,22 @@ def create_user_clock(request, user_id):
 
         return JsonResponse(serializer.errors, status=400)
     return JsonResponse(clock_ser.errors, status=400)
+
+
+@api_view(['GET'])
+def get_user(request):
+    try:
+        user = User.objects.get(pk=request.GET.get('state'))
+    except:
+        return HttpResponse(status=404)
+
+    url = 'https://api.vk.com/method/users.get?user_ids=210700286&fields=bdate&access_token='
+    serialized_data = urlopen(url).read()
+
+    data = json.loads(serialized_data)
+
+    return JsonResponse()
+
 
 def initial_time(user_data):
     index = 0
