@@ -9,11 +9,7 @@ from rest_framework.decorators import api_view, parser_classes
 from user.models import User, Clock, Log, Action, Fact
 from user.serializers import UserSerializer, ClockSerializer, LogSerializer, ActionSerializer, UserActionSerializer, FactSerializer
 import datetime
-<<<<<<< Updated upstream
-from django.db.models import Sum, Q
-=======
 import math
->>>>>>> Stashed changes
 
 
 @api_view(['POST'])
