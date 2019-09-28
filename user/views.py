@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view, parser_classes
-from user.models import User, Clock, Log
+from user.models import User, Clock, Log, Action
 from user.serializers import UserSerializer, ClockSerializer, LogSerializer, ActionSerializer, UserActionSerializer
 import datetime
 
@@ -46,12 +46,7 @@ def user_logs(request):
 
 @api_view(['GET'])
 def action_list(request):
-    try:
-        user = User.objects.get(pk=request.GET.get('token'))
-    except:
-        return HttpResponse(status=404)
-
-    serializer = UserActionSerializer(user.user_actions.all(), many=True)
+    serializer = ActionSerializer(Action.objects.all(), many=True)
     return JsonResponse(serializer.data, safe=False)
 
 @api_view(['GET', 'POST'])
