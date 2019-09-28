@@ -11,11 +11,13 @@ from django.template import Template
 import math
 from urllib.request import urlopen
 import json
+import requests
 
 
 @api_view(['GET'])
 def create_empty_user(request):
-    data = {'name': '', 'clock': None, 'token': '', 'drinking': False, 'smoking': False}
+    data = {'name': '', 'clock': None, 'token': '',
+            'drinking': False, 'smoking': False}
     serializer = UserSerializer(data=data)
 
     if serializer.is_valid():
@@ -77,13 +79,11 @@ def get_user(request, user_id):
     except:
         return HttpResponse(status=404)
 
-    url = 'https://api.vk.com/method/users.get?user_ids=' + user.vk_id + '&fields=personal&access_token=' + user.token
-    serialized_data = urlopen(url).read()
-
-    data = json.loads(serialized_data)
-    received_data = JSONParser().parse(data)
-
-    user.name = received_data['first_name'] + received_data['last_name']
+    url = 'https://api.vk.com/method/users.get?user_ids=' + \
+        user.vk_id + '&fields=personal&access_token=' + user.token + '&v=5.101'
+    received_data = requests.get(url).json()['response'][0]
+    print(received_data)
+    user.name = received_data['first_name'] + ' ' + received_data['last_name']
 
     if received_data['personal']['smoking'] > 3:
         user.smoking = True
@@ -96,7 +96,7 @@ def get_user(request, user_id):
         user.drinking = False
 
     user.save()
-    serializer = UserSerializer(pk=user.pk)
+    serializer = UserSerializer(User.objects.get(pk=user.pk))
 
     return JsonResponse(serializer.data)
 
@@ -180,8 +180,10 @@ def commit_action(request, action_id):
         return HttpResponse(status=404)
 
     time_effect_minutes = datetime.timedelta(minutes=action.time_effect)
-    new_time = (datetime.datetime.combine(datetime.date(1,1,1), user.clock.time) + time_effect_minutes).time()
-    log = Log(user=user, time=datetime.datetime.now(), action=action, before=user.clock.time, after=new_time)
+    new_time = (datetime.datetime.combine(datetime.date(1, 1, 1),
+                                          user.clock.time) + time_effect_minutes).time()
+    log = Log(user=user, time=datetime.datetime.now(),
+              action=action, before=user.clock.time, after=new_time)
     user.clock.time = new_time
     user.clock.save()
     log.save()
@@ -202,10 +204,12 @@ def user_weekly_logs(request):
     last_7_days = datetime.datetime.today() - datetime.timedelta(7)
     logs = Log.objects.filter(user=user.pk, time__gte=last_7_days)\
         .annotate(day=TruncDate('time')).values('day').annotate(
-            plus_overall=Sum('action__time_effect', filter=Q(action__time_effect__gt=0)),
+            plus_overall=Sum('action__time_effect',
+                             filter=Q(action__time_effect__gt=0)),
             minus_overall=Sum('action__time_effect', filter=Q(action__time_effect__lt=0)))
-    
+
     return JsonResponse(list(logs), safe=False)
+
 
 @api_view(['GET'])
 def user_monthly_logs(request):
@@ -217,7 +221,8 @@ def user_monthly_logs(request):
     last_30_days = datetime.datetime.today() - datetime.timedelta(30)
     logs = user.logs.filter(user=user.pk, time__gte=last_30_days)\
         .annotate(day=TruncDate('time')).values('day').annotate(
-        plus_overall=Sum('action__time_effect', only=Q(action__time_effect__gt=0)),
+        plus_overall=Sum('action__time_effect',
+                         only=Q(action__time_effect__gt=0)),
         minus_overall=Sum('action__time_effect', only=Q(action__time_effect__lt=0)))
 
     return JsonResponse(list(logs), safe=False)
