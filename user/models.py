@@ -39,8 +39,8 @@ class Log(models.Model):
     user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='logs')
     time = models.DateTimeField()
     action = models.ForeignKey(Action, null=True, on_delete=models.CASCADE, related_name='logs')
-    before = models.TimeField()
-    after = models.TimeField()
+    before = models.TimeField(default=datetime.time(0, 0, 0))
+    after = models.TimeField(default=datetime.time(0, 0, 0))
 
     def create(self, data):
         self.user = data['user']

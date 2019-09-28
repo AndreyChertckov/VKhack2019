@@ -2,8 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view, parser_classes
-from user.models import User, Clock
-from user.serializers import UserSerializer, ClockSerializer
+from user.models import User, Clock, Log, UserAction
+from user.serializers import UserSerializer, ClockSerializer, LogSerializer, UserActionSerializer
 import datetime
 
 @api_view(['POST'])
@@ -22,7 +22,7 @@ def create_user(request):
             return JsonResponse(serializer.data, status=201)
     
         return JsonResponse(serializer.errors, status=400)
-    return JSONParser(clock_ser.errors, status=400)
+    return JsonResponse(clock_ser.errors, status=400)
 
 @api_view(['GET'])
 def user_clock(request):
@@ -41,12 +41,20 @@ def user_logs(request):
     except:
         return HttpResponse(status=404)
 
+    print(user)
+    print(user.logs.all())
+    serializer = LogSerializer(user.logs.all(), many=True)
+    return JsonResponse(serializer.data, safe=False)
+
 @api_view(['GET'])
 def action_list(request):
     try:
         user = User.objects.get(pk=request.GET.get('token'))
     except:
         return HttpResponse(status=404)
+
+    serializer = UserActionSerializer(user.user_actions)
+    return JsonResponse(serializer.data, safe=False)
 
 @api_view(['GET', 'POST'])
 def action_details(request):

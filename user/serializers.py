@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from user.models import User, Clock, Action, Log, Fact
+from user.models import User, Clock, Action, Log, UserAction, Fact
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -31,10 +31,17 @@ class ActionSerializer(serializers.ModelSerializer):
 
 
 class LogSerializer(serializers.ModelSerializer):
-
+    action = ActionSerializer()
     class Meta:
         model = Log
-        fileds = ['time', 'action', 'before', 'after']
+        fields = ['time', 'before', 'after', 'action']
+
+
+class UserActionSerializer(serializers.ModelSerializer):
+    action = ActionSerializer()
+    class Meta:
+        model = UserAction
+        fields = ['action', 'frequency']
 
 
 class FactSerializer(serializers.ModelSerializer):
