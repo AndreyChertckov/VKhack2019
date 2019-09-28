@@ -119,3 +119,6 @@ venv.bak/
 #intellij
 .idea/
 .idea/workspace.xml
+
+#local test
+test.py

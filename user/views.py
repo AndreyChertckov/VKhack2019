@@ -8,18 +8,20 @@ from user.serializers import UserSerializer, ClockSerializer, LogSerializer, Act
 import datetime
 from django.db.models import Sum, Q
 from django.template import Template
+import math
+
 
 @api_view(['POST'])
 @parser_classes([JSONParser])
 def create_user(request):
     data = JSONParser().parse(request)
 
-    clock_ser = ClockSerializer(data={'time': datetime.time(12, 10)})
+    clock_ser = ClockSerializer(data={'time': initial_time(data)})
     if clock_ser.is_valid():
         clock = clock_ser.save()
         data['clock'] = clock.pk
 
-        serializer = UserSerializer(data=data)
+        serializer = UserSerializer(data=data['name'])
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=201)
@@ -41,6 +43,39 @@ def add_token(request, token):
 
     template = Template('Success. Token saved.')
     return template.render()
+
+def initial_time(user_data):
+    index = 0
+    if user_data['heart_desease'] == True:
+        index += 1
+    if user_data['hypertension'] == True:
+        index += 1
+    if user_data['diabetes'] == True:
+        index += 1
+    if user_data['vascular_desease'] == True:
+        index += 1
+    if user_data['heridity'] == True:
+        index += 1
+    if user_data['smoking'] == True:
+        index += 0.25
+    if user_data['drinking'] == True:
+        index += 0.25
+    if user_data['age'] >= 65:
+        if user_data['age'] >= 75:
+            index += 2
+        else:
+            index += 1
+    if user_data['sports'] == 0:
+        index += 0.5
+    elif user_data['sports'] == 1:
+        index += 0.25
+    if user_data['stress'] == 2:
+        index += 0.5
+    elif user_data['stress'] == 1:
+        index += 0.25
+    index = index / 9 * 21
+    time = datetime.time(math.trunc(index), math.floor(math.fmod(index, 1)*60))
+    return time
 
 
 @api_view(['GET'])
