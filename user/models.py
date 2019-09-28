@@ -1,11 +1,13 @@
 from django.db import models
 from django.utils import timezone
 import datetime
-from django.db.models import Q
 
 
 class User(models.Model):
     name = models.CharField(max_length=200, default="Arina")
+    token = models.CharField(default='')
+    smoke = models.BooleanField()
+    alcohol = models.BooleanField()
     clock = models.ForeignKey('Clock', on_delete=models.CASCADE, related_name='user')
 
     def create(self, data):

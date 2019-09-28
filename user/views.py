@@ -1,16 +1,13 @@
-from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
-from django.db.models import Sum, Q
 from django.db.models.functions import TruncDate
-from django.db.models.fields import DateField
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view, parser_classes
-from user.models import User, Clock, Log, Action, Fact
+from user.models import User, Log, Action, Fact
 from user.serializers import UserSerializer, ClockSerializer, LogSerializer, ActionSerializer, UserActionSerializer, FactSerializer
 import datetime
 from django.db.models import Sum, Q
-
+from django.template import Template
 
 @api_view(['POST'])
 @parser_classes([JSONParser])
@@ -29,6 +26,21 @@ def create_user(request):
 
         return JsonResponse(serializer.errors, status=400)
     return JsonResponse(clock_ser.errors, status=400)
+
+
+@api_view(['POST'])
+@parser_classes([JSONParser])
+def add_token(request, token):
+    try:
+        user = User.objects.get(pk=request.GET.get('token'))
+    except:
+        return HttpResponse(status=404)
+
+    user.token = token
+    user.save()
+
+    template = Template('Success. Token saved.')
+    return template.render()
 
 
 @api_view(['GET'])
