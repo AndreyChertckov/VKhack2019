@@ -71,18 +71,34 @@ def create_user_clock(request, user_id):
 
 
 @api_view(['GET'])
-def get_user(request):
+def get_user(request, user_id):
     try:
-        user = User.objects.get(pk=request.GET.get('state'))
+        user = User.objects.get(pk=user_id)
     except:
         return HttpResponse(status=404)
 
-    url = 'https://api.vk.com/method/users.get?user_ids=210700286&fields=bdate&access_token='
+    url = 'https://api.vk.com/method/users.get?user_ids=' + user.vk_id + '&fields=personal&access_token=' + user.token
     serialized_data = urlopen(url).read()
 
     data = json.loads(serialized_data)
+    received_data = JSONParser().parse(data)
 
-    return JsonResponse()
+    user.name = received_data['first_name'] + received_data['last_name']
+
+    if received_data['personal']['smoking'] > 3:
+        user.smoking = True
+    else:
+        user.smoking = False
+
+    if received_data['personal']['alcohol'] > 3:
+        user.drinking = True
+    else:
+        user.drinking = False
+
+    user.save()
+    serializer = UserSerializer(pk=user.pk)
+
+    return JsonResponse(serializer.data)
 
 
 def initial_time(user_data):
