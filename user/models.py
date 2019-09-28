@@ -36,6 +36,7 @@ class Action(models.Model):
     users = models.ManyToManyField(User, related_name='actions', through='UserAction')
     description = models.CharField(max_length=380)
 
+
 class Log(models.Model):
     user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='logs')
     time = models.DateTimeField()
@@ -70,7 +71,7 @@ class WeeklyLog(models.Model):
     @property
     def weekly_log(self):
         last_7_days = datetime.datetime.today() - datetime.timedelta(7)
-        return self.user.logs.filter(date_added_gte=last_7_days).extra({"day": "date_trunc('day', date_added)"})\
+        return self.user.logs.filter(date_added_gte=last_7_days)\
             .annotate(
             week_minus=models.Sum('action__time_effect', only=Q(action__time_effect__lt=0)),
             week_plus=models.Sum('action__time_effect', only=Q(action__time_effect__gt=0)))
@@ -82,7 +83,7 @@ class MonthlyLog(models.Model):
     @property
     def monthly_log(self):
         last_30_days = datetime.datetime.today() - datetime.timedelta(30)
-        return self.user.logs.filter(date_added_gte=last_30_days).extra({"day": "date_trunc('day', date_added)"}) \
+        return self.user.logs.filter(date_added_gte=last_30_days) \
             .annotate(
             month_minus=models.Sum('action__time_effect', only=Q(action__time_effect__lt=0)),
             month_plus=models.Sum('action__time_effect', only=Q(action__time_effect__gt=0)))

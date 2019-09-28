@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view, parser_classes
 from user.models import User, Clock, Log, Action
 from user.serializers import UserSerializer, ClockSerializer, LogSerializer, ActionSerializer, UserActionSerializer
 import datetime
+from django.db.models import Sum, Q
 
 
 @api_view(['POST'])
@@ -95,6 +96,14 @@ def user_monthly_logs(request):
         user = User.objects.get(pk=request.GET.get('token'))
     except:
         return HttpResponse(status=404)
+
+    last_30_days = datetime.datetime.today() - datetime.timedelta(30)
+    logs = user.logs.filter(user=user.pk, date_added_gte=last_30_days)\
+        .annotate().annotate(
+        month_minus=Sum('action__time_effect', only=Q(action__time_effect__lt=0)),
+        month_plus=Sum('action__time_effect', only=Q(action__time_effect__gt=0)))
+
+    return JsonResponse(list(logs), safe=False)
 
 
 @api_view(['GET'])
