@@ -64,31 +64,6 @@ class UserAction(models.Model):
     def frequency(self):
         return self.user.logs.filter(action__id=self.action.id).aggregate(count=models.Count("id"))['count']
 
-
-class WeeklyLog(models.Model):
-    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='weekly_log')
-
-    @property
-    def weekly_log(self):
-        last_7_days = datetime.datetime.today() - datetime.timedelta(7)
-        return self.user.logs.filter(date_added_gte=last_7_days)\
-            .annotate(
-            week_minus=models.Sum('action__time_effect', only=Q(action__time_effect__lt=0)),
-            week_plus=models.Sum('action__time_effect', only=Q(action__time_effect__gt=0)))
-
-
-class MonthlyLog(models.Model):
-    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='monthly_log')
-
-    @property
-    def monthly_log(self):
-        last_30_days = datetime.datetime.today() - datetime.timedelta(30)
-        return self.user.logs.filter(date_added_gte=last_30_days) \
-            .annotate(
-            month_minus=models.Sum('action__time_effect', only=Q(action__time_effect__lt=0)),
-            month_plus=models.Sum('action__time_effect', only=Q(action__time_effect__gt=0)))
-
-
 class Fact(models.Model):
     description = models.TextField()
     appearance_time = models.TimeField()

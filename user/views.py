@@ -1,10 +1,13 @@
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
+from django.db.models import Sum, Q
+from django.db.models.functions import TruncDate
+from django.db.models.fields import DateField
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view, parser_classes
-from user.models import User, Clock, Log, Action
-from user.serializers import UserSerializer, ClockSerializer, LogSerializer, ActionSerializer, UserActionSerializer
+from user.models import User, Clock, Log, Action, Fact
+from user.serializers import UserSerializer, ClockSerializer, LogSerializer, ActionSerializer, UserActionSerializer, FactSerializer
 import datetime
 from django.db.models import Sum, Q
 
@@ -89,6 +92,13 @@ def user_weekly_logs(request):
     except:
         return HttpResponse(status=404)
 
+    last_7_days = datetime.datetime.today() - datetime.timedelta(7)
+    logs = Log.objects.filter(user=user.pk, time__gte=last_7_days)\
+        .annotate(day=TruncDate('time')).values('day').annotate(
+            plus_overall=Sum('action__time_effect', filter=Q(action__time_effect__gt=0)),
+            minus_overall=Sum('action__time_effect', filter=Q(action__time_effect__lt=0)))
+    
+    return JsonResponse(list(logs), safe=False)
 
 @api_view(['GET'])
 def user_monthly_logs(request):
@@ -98,17 +108,19 @@ def user_monthly_logs(request):
         return HttpResponse(status=404)
 
     last_30_days = datetime.datetime.today() - datetime.timedelta(30)
-    logs = user.logs.filter(user=user.pk, date_added_gte=last_30_days)\
-        .annotate().annotate(
-        month_minus=Sum('action__time_effect', only=Q(action__time_effect__lt=0)),
-        month_plus=Sum('action__time_effect', only=Q(action__time_effect__gt=0)))
+    logs = user.logs.filter(user=user.pk, time__gte=last_30_days)\
+        .annotate(day=TruncDate('time')).values('day').annotate(
+        plus_overall=Sum('action__time_effect', only=Q(action__time_effect__gt=0)),
+        minus_overall=Sum('action__time_effect', only=Q(action__time_effect__lt=0)))
 
     return JsonResponse(list(logs), safe=False)
 
 
 @api_view(['GET'])
 def random_fact(request):
-    pass
+    fact = Fact.objects.order_by('?').first()
+    serializer = FactSerializer(fact)
+    return JsonResponse(serializer.data, safe=False)
 
 
 @api_view(['GET'])
