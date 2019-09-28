@@ -46,7 +46,14 @@ def user_logs(request):
 
 @api_view(['GET'])
 def action_list(request):
-    serializer = ActionSerializer(Action.objects.all(), many=True)
+    try:
+        user = User.objects.get(pk=request.GET.get('token'))
+    except:
+        return HttpResponse(status=404)
+    if len(user.user_actions.all()) < 1: 
+        serializer = ActionSerializer(Action.objects.all(), many=True)
+    else:
+        serializer = UserActionSerializer(user.user_actions.all(), many=True)
     return JsonResponse(serializer.data, safe=False)
 
 @api_view(['GET', 'POST'])

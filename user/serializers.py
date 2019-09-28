@@ -26,7 +26,7 @@ class ClockSerializer(serializers.ModelSerializer):
 class ActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Action
-        fields = ['name', 'time_effect']
+        fields = ['name', 'time_effect', 'description']
 
 
 class LogSerializer(serializers.ModelSerializer):
