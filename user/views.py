@@ -3,8 +3,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view, parser_classes
-from user.models import User, Clock, Log, Action
-from user.serializers import UserSerializer, ClockSerializer, LogSerializer, ActionSerializer, UserActionSerializer
+from user.models import User, Clock, Log, Action, Fact
+from user.serializers import UserSerializer, ClockSerializer, LogSerializer, ActionSerializer, UserActionSerializer, FactSerializer
 import datetime
 
 
@@ -99,7 +99,9 @@ def user_monthly_logs(request):
 
 @api_view(['GET'])
 def random_fact(request):
-    pass
+    fact = Fact.objects.order_by('?').first()
+    serializer = FactSerializer(fact)
+    return JsonResponse(serializer.data, safe=False)
 
 
 @api_view(['GET'])
