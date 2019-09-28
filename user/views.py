@@ -52,13 +52,13 @@ def initial_time(user_data):
             index += 2
         else:
             index += 1
-    if user_data['sports'] == "low":
+    if user_data['sports'] == 0:
         index += 0.5
-    elif user_data['sports'] == "medium":
+    elif user_data['sports'] == 1:
         index += 0.25
-    if user_data['stress'] == "high":
+    if user_data['stress'] == 2:
         index += 0.5
-    elif user_data['stress'] == "medium":
+    elif user_data['stress'] == 1:
         index += 0.25
     index = index / 9 * 21
     time = datetime.time(math.trunc(index), math.floor(math.fmod(index, 1)*60))
