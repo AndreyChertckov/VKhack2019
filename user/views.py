@@ -1,13 +1,15 @@
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Sum, Q
 from django.db.models.functions import TruncDate
 from django.db.models.fields import DateField
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view, parser_classes
-from user.models import User, Clock, Log, Action
-from user.serializers import UserSerializer, ClockSerializer, LogSerializer, ActionSerializer, UserActionSerializer
+from user.models import User, Clock, Log, Action, Fact
+from user.serializers import UserSerializer, ClockSerializer, LogSerializer, ActionSerializer, UserActionSerializer, FactSerializer
 import datetime
+
 
 @api_view(['POST'])
 @parser_classes([JSONParser])
@@ -23,9 +25,10 @@ def create_user(request):
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=201)
-    
+
         return JsonResponse(serializer.errors, status=400)
     return JsonResponse(clock_ser.errors, status=400)
+
 
 @api_view(['GET'])
 def user_clock(request):
@@ -37,6 +40,7 @@ def user_clock(request):
     serializer = ClockSerializer(user.clock)
     return JsonResponse(serializer.data, safe=False)
 
+
 @api_view(['GET'])
 def user_logs(request):
     try:
@@ -47,24 +51,38 @@ def user_logs(request):
     serializer = LogSerializer(user.logs.all(), many=True)
     return JsonResponse(serializer.data, safe=False)
 
+
 @api_view(['GET'])
 def action_list(request):
     try:
         user = User.objects.get(pk=request.GET.get('token'))
     except:
         return HttpResponse(status=404)
-    if len(user.user_actions.all()) < 1: 
+    if len(user.user_actions.all()) < 1:
         serializer = ActionSerializer(Action.objects.all(), many=True)
     else:
         serializer = UserActionSerializer(user.user_actions.all(), many=True)
     return JsonResponse(serializer.data, safe=False)
 
-@api_view(['GET', 'POST'])
-def action_details(request):
+
+@api_view(['POST'])
+@csrf_exempt
+def commit_action(request, action_id):
     try:
         user = User.objects.get(pk=request.GET.get('token'))
+        action = Action.objects.get(pk=action_id)
     except:
         return HttpResponse(status=404)
+
+    time_effect_minutes = datetime.timedelta(minutes=action.time_effect)
+    new_time = (datetime.datetime.combine(datetime.date(1,1,1), user.clock.time) + time_effect_minutes).time()
+    log = Log(user=user, time=datetime.datetime.now(), action=action, before=user.clock.time, after=new_time)
+    user.clock.time = new_time
+    user.clock.save()
+    log.save()
+    action.users.add(user)
+    return JsonResponse({'status': 'ok'})
+
 
 @api_view(['GET'])
 def user_weekly_logs(request):
@@ -88,9 +106,13 @@ def user_monthly_logs(request):
     except:
         return HttpResponse(status=404)
 
+
 @api_view(['GET'])
 def random_fact(request):
-    pass
+    fact = Fact.objects.order_by('?').first()
+    serializer = FactSerializer(fact)
+    return JsonResponse(serializer.data, safe=False)
+
 
 @api_view(['GET'])
 def random_fact_by_time(request):

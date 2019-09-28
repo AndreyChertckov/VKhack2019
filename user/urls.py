@@ -7,4 +7,7 @@ urlpatterns = [
     path('api/user/logs', views.user_logs),
     path('api/action', views.action_list),
     path('api/user/logs/week', views.user_weekly_logs)
+    path('api/action/<int:action_id>', views.commit_action),
+    path('api/fact', views.random_fact),
+    path('api/user/fact', views.random_fact_by_time)
 ]
