@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
     clock = ClockSerializer(allow_null=True)
     class Meta:
         model = User
-        fields = ['id', 'name', 'clock', 'token', 'drinking', 'smoking']
+        fields = ['id', 'name', 'vk_id', 'clock', 'token', 'drinking', 'smoking']
 
     def create(self, validated_data):
         return User.objects.create(**validated_data)

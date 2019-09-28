@@ -23,6 +23,21 @@ def create_empty_user(request):
     return JsonResponse(serializer.errors, status=400)
 
 
+@api_view(['GET'])
+def add_token(request):
+    try:
+        user = User.objects.get(pk=request.GET.get('state'))
+    except:
+        return HttpResponse(status=404)
+
+    user.token = request.GET.get('access_token')
+    user.vk_id = request.GET.get('user_id')
+    user.save()
+
+    template = Template('Готово. Теперь вы можете перейти к приложению.')
+    return template.render()
+
+
 @api_view(['POST'])
 def create_user_clock(request, user_id):
     try:
@@ -47,21 +62,6 @@ def create_user_clock(request, user_id):
 
         return JsonResponse(serializer.errors, status=400)
     return JsonResponse(clock_ser.errors, status=400)
-
-
-@api_view(['GET'])
-def add_token(request, token):
-    try:
-        user = User.objects.get(pk=request.GET.get('token'))
-    except:
-        return HttpResponse(status=404)
-
-    user.token = token
-    user.save()
-
-    template = Template('Success. Token saved.')
-    return template.render()
-
 
 def initial_time(user_data):
     index = 0

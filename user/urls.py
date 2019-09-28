@@ -4,6 +4,7 @@ from user import views
 urlpatterns = [
     path('api/user/create', views.create_empty_user),
     path('api/user/<int:user_id>', views.create_user_clock),
+    path('api/user/default', views.add_token),
     path('api/user/clock', views.user_clock),
     path('api/user/logs', views.user_logs),
     path('api/action', views.action_list),

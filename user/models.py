@@ -5,6 +5,7 @@ import datetime
 
 class User(models.Model):
     name = models.CharField(max_length=200, null=True, blank=True)
+    vk_id = models.CharField(max_length=200, null=True, blank= True)
     token = models.CharField(max_length=200, null=True, blank= True)
     smoking = models.BooleanField(null=True)
     drinking = models.BooleanField(null=True)
