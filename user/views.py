@@ -46,18 +46,22 @@ def create_user_clock(request, user_id):
         return HttpResponse(status=404)
     received_data = JSONParser().parse(request)
     user_data = UserSerializer(user).data
-    # overwrite the fields by received data
-    for i in received_data.keys():
-        user[i] = received_data[i]
+    user_data['name'] = received_data['name']
+    user_data['drinking'] = received_data['drinking']
+    user_data['smoking'] = received_data['smoking']
 
     clock_ser = ClockSerializer(data={'time': initial_time(received_data)})
     if clock_ser.is_valid():
         clock = clock_ser.save()
-        data['clock'] = clock.pk
+        user_data['clock'] = clock_ser.data
 
         serializer = UserSerializer(data=user_data)
         if serializer.is_valid():
-            serializer.save()
+            user.name = user_data['name']
+            user.drinking = user_data['drinking']
+            user.smoking = user_data['smoking']
+            user.clock = Clock.objects.get(pk=clock.pk)
+            user.save()
             return JsonResponse(serializer.data, status=201)
 
         return JsonResponse(serializer.errors, status=400)
