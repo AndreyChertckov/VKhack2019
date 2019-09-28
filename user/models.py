@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 import datetime
+from django.db.models import Q
 
 
 class User(models.Model):
@@ -41,9 +42,15 @@ class Log(models.Model):
     before = models.TimeField()
     after = models.TimeField()
 
-    def create(self):
+    def create(self, data):
+        self.user = data['user']
+        self.action = data['action']
         self.time = timezone.now()
-        self.before = self.user.clock.time
+        if self.action.time_effect > 0:
+            self.before = (self.user.clock.time - datetime.time(minute=self.action.time_effect)).time()
+        else:
+            self.before = (self.user.clock.time + datetime.time(minute=((-1) * self.action.time_effect))).time()
+        self.after = self.user.clock.time
         self.save()
 
 
@@ -53,11 +60,7 @@ class UserAction(models.Model):
 
     @property
     def usage_frequency(self):
-        n = 0
-        for log in self.user.logs:
-            if log.action.id == self.action.id:
-                n += 1
-        return n
+        return self.user.logs.filter(action__id=self.action.id).annotate(count=models.Count("id"))['count']
 
 
 class WeeklyLog(models.Model):
@@ -65,18 +68,11 @@ class WeeklyLog(models.Model):
 
     @property
     def weekly_log(self):
-        current = datetime.date.today()
-        week = {}
-        for i in range(0, 7):
-            week[(current - datetime.timedelta(days=(i + 1)))] = [0, 0]
-        for day in week:
-            for log in self.user.logs:
-                if log.time.date() == day:
-                    if log.action.time_effect > 0:
-                        week[day][0] += log.action.time_effect
-                    else:
-                        week[day][1] += log.action.time_effect
-        return week
+        last_7_days = datetime.datetime.today() - datetime.timedelta(7)
+        return self.user.logs.filter(date_added_gte=last_7_days).extra({"day": "date_trunc('day', date_added)"})\
+            .annotate(
+            week_minus=models.Sum('action__time_effect', only=Q(action__time_effect__lt=0)),
+            week_plus=models.Sum('action__time_effect', only=Q(action__time_effect__gt=0)))
 
 
 class MonthlyLog(models.Model):
@@ -84,18 +80,11 @@ class MonthlyLog(models.Model):
 
     @property
     def monthly_log(self):
-        current = datetime.date.today()
-        month = {}
-        for i in range(0, 30):
-            month[(current - datetime.timedelta(days=(i + 1)))] = [0, 0]
-        for day in month:
-            for log in self.user.logs:
-                if log.time.date() == day:
-                    if log.action.time_effect > 0:
-                        month[day][0] += log.action.time_effect
-                    else:
-                        month[day][1] += log.action.time_effect
-        return month
+        last_30_days = datetime.datetime.today() - datetime.timedelta(30)
+        return self.user.logs.filter(date_added_gte=last_30_days).extra({"day": "date_trunc('day', date_added)"}) \
+            .annotate(
+            month_minus=models.Sum('action__time_effect', only=Q(action__time_effect__lt=0)),
+            month_plus=models.Sum('action__time_effect', only=Q(action__time_effect__gt=0)))
 
 
 class Fact(models.Model):
