@@ -24,7 +24,6 @@ class ClockSerializer(serializers.ModelSerializer):
 
 
 class ActionSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Action
         fields = ['name', 'time_effect']
@@ -38,10 +37,11 @@ class LogSerializer(serializers.ModelSerializer):
 
 
 class UserActionSerializer(serializers.ModelSerializer):
+    frequency = serializers.ReadOnlyField()
     action = ActionSerializer()
     class Meta:
         model = UserAction
-        fields = ['action', 'frequency']
+        fields = ['action','user','frequency']
 
 
 class FactSerializer(serializers.ModelSerializer):

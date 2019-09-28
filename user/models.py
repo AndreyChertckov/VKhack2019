@@ -33,7 +33,7 @@ class Clock(models.Model):
 class Action(models.Model):
     name = models.CharField(max_length=200)
     time_effect = models.IntegerField()
-
+    users = models.ManyToManyField(User, related_name='actions', through='UserAction')
 
 class Log(models.Model):
     user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='logs')
@@ -59,8 +59,8 @@ class UserAction(models.Model):
     action = models.ForeignKey(Action, null=True, on_delete=models.CASCADE, related_name='user_actions')
 
     @property
-    def usage_frequency(self):
-        return self.user.logs.filter(action__id=self.action.id).annotate(count=models.Count("id"))['count']
+    def frequency(self):
+        return self.user.logs.filter(action__id=self.action.id).aggregate(count=models.Count("id"))['count']
 
 
 class WeeklyLog(models.Model):
