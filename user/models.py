@@ -34,6 +34,7 @@ class Action(models.Model):
     name = models.CharField(max_length=200)
     time_effect = models.IntegerField()
     users = models.ManyToManyField(User, related_name='actions', through='UserAction')
+    description = models.CharField(max_length=380)
 
 class Log(models.Model):
     user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='logs')
