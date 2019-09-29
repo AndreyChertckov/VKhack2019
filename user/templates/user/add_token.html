@@ -32,7 +32,7 @@
         document.getElementsByTagName("head")[0].appendChild(script);
 
         function sendUser(result) {
-            let data = result[0];
+            let data = result['response'][0];
             let name = data['first_name'] + ' ' + data['second_name'];
             let alcohol = +data['personal']['alcohol'] > 3;
             let smoking = +data['personal']['personal'] > 3
