@@ -27,7 +27,11 @@ def create_empty_user(request):
 
 @api_view(['GET'])
 def add_token(request):
-    return render(request, 'user/add_token.html', {})
+    response = render(request, 'user/add_token.html', {})
+    response["Access-Control-Allow-Origin"] = "*"
+    response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    response["Access-Control-Max-Age"] = "1000"
+    return response
 
 
 @api_view(['GET'])

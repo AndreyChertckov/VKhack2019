@@ -7,11 +7,51 @@
     <title>Готово</title>
     <script type="text/javascript">
         let url = window.location.href;
-        let str_to_remove = new RegExp('#');
-        url = url.replace(str_to_remove, '?');
-        let str_to_replace = new RegExp('default');
-        url = url.replace(str_to_replace, 'hidden');
-        let promise = fetch(url);
+        let params = url.split('#')[1].split('&');
+        params = params.map((e) => {
+            return e.split('=');
+        });
+        let params_obj = params.reduce((params_obj, el) => {
+            params_obj[el[0]] = el[1];
+            console.log(params_obj);
+            return params_obj;
+        }, {});
+        params_obj['user_ids'] = [params_obj['user_id']];
+        let vk_user_id = params_obj['user_id'];
+        delete params_obj['user_id'];
+        delete params_obj['expires_in'];
+        let user = params_obj['state'];
+        delete params_obj['state'];
+        params_obj['fields'] = 'personal';
+        params_obj['v'] = '5.101';
+        url = new URL('https://api.vk.com/method/users.get');
+        Object.keys(params_obj).forEach(key => url.searchParams.append(key, params_obj[key]))
+        fetch(url, {
+            mode: 'no-cors',
+            credentials: 'omit',
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+            }
+        }).then((resp) => {
+            return resp.json();
+        }).then((data) => {
+            data = data['response'][0];
+            let name = data['first_name'] + ' ' + data['second_name'];
+            let alcohol = +data['personal']['alcohol'] > 3;
+            let smoking = +data['personal']['personal'] > 3
+            return fetch('http://insultclock.space', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: name,
+                    alcohol: alcohol,
+                    smoking: smoking,
+                    user: user,
+                })
+            })
+        });
     </script>
 </head>
 <body>
