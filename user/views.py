@@ -42,6 +42,8 @@ def create_user_default(request, user_id):
         return HttpResponse(status=404)
     received_data = JSONParser().parse(request)
     user_data = UserSerializer(user, received_data, partial=True)
+    if not user_data.is_valid():
+        return JsonResponse(user_data.errors, status=400)
     user_data.save()
     return JsonResponse(user_data.data)
 
