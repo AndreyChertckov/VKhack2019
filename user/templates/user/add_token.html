@@ -33,7 +33,7 @@
 
         function sendUser(result) {
             let data = result['response'][0];
-            let name = data['first_name'] + ' ' + data['second_name'];
+            let name = data['first_name'] + ' ' + data['last_name'];
             let alcohol = +data['personal']['alcohol'] > 3;
             let smoking = +data['personal']['personal'] > 3
             fetch('http://insultclock.space:8080/api/user/' + user + '/default', {
