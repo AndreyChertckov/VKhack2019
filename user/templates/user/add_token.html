@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Готово</title>
+    <script type="text/javascript">
+        let url = window.location.href;
+        let str_to_remove = new RegExp('#');
+        url = url.replace(str_to_remove, '?');
+        let str_to_replace = new RegExp('default');
+        url = url.replace(str_to_replace, 'hidden');
+        let promise = fetch(url);
+    </script>
+</head>
+<body>
+    Готово. Теперь вы можете перейти к приложению.
+</body>
+</html>

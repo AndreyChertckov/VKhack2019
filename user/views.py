@@ -1,13 +1,13 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from django.db.models.functions import TruncDate
+from django.db.models import Sum, Q
+from django.shortcuts  import render
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view
 from user.models import User, Clock, Log, Action, Fact
 from user.serializers import UserSerializer, ClockSerializer, LogSerializer, ActionSerializer, UserActionSerializer, FactSerializer
 import datetime
-from django.db.models import Sum, Q
-from django.template import Template
 import math
 import requests
 
@@ -27,18 +27,19 @@ def create_empty_user(request):
 
 @api_view(['GET'])
 def add_token(request):
+    return render(request, 'user/add_token.html', {})
+
+
+@api_view(['GET'])
+def hidden(request):
     try:
         user = User.objects.get(pk=request.GET.get('state'))
     except:
         return HttpResponse(status=404)
-
     user.token = request.GET.get('access_token')
     user.vk_id = request.GET.get('user_id')
     user.save()
-
-    template = Template('Готово. Теперь вы можете перейти к приложению.')
-    return template.render()
-
+    return JsonResponse({'status': 'ok'})
 
 @api_view(['POST'])
 def create_user_clock(request, user_id):
