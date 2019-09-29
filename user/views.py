@@ -34,17 +34,6 @@ def add_token(request):
     return response
 
 
-@api_view(['GET'])
-def hidden(request):
-    try:
-        user = User.objects.get(pk=request.GET.get('state'))
-    except:
-        return HttpResponse(status=404)
-    user.token = request.GET.get('access_token')
-    user.vk_id = request.GET.get('user_id')
-    user.save()
-    return JsonResponse({'status': 'ok'})
-
 @api_view(['POST'])
 def create_user_clock(request, user_id):
     try:
@@ -81,25 +70,6 @@ def get_user(request, user_id):
         user = User.objects.get(pk=user_id)
     except:
         return HttpResponse(status=404)
-
-    if user.token != '':
-        url = 'https://api.vk.com/method/users.get?user_ids=' + \
-            user.vk_id + '&fields=personal&access_token=' + user.token + '&v=5.101'
-        received_data = requests.get(url).json()['response'][0]
-        print(received_data)
-        user.name = received_data['first_name'] + ' ' + received_data['last_name']
-
-        if received_data['personal']['smoking'] > 3:
-            user.smoking = True
-        else:
-            user.smoking = False
-
-        if received_data['personal']['alcohol'] > 3:
-            user.drinking = True
-        else:
-            user.drinking = False
-
-        user.save()
 
     serializer = UserSerializer(User.objects.get(pk=user.pk))
 

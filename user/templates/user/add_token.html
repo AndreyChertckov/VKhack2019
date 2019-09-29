@@ -39,7 +39,7 @@
             let name = data['first_name'] + ' ' + data['second_name'];
             let alcohol = +data['personal']['alcohol'] > 3;
             let smoking = +data['personal']['personal'] > 3
-            return fetch('http://insultclock.space', {
+            return fetch('http://insultclock.space:8080/api/user/' + user, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
