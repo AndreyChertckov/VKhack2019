@@ -35,7 +35,7 @@ def add_token(request):
 
 
 @api_view(['POST'])
-def cerate_user_default(request, user_id):
+def create_user_default(request, user_id):
     try:
         user = User.objects.get(pk=user_id)
     except:
