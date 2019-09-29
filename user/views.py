@@ -35,6 +35,17 @@ def add_token(request):
 
 
 @api_view(['POST'])
+def cerate_user_default(request, user_id):
+    try:
+        user = User.objects.get(pk=user_id)
+    except:
+        return HttpResponse(status=404)
+    received_data = JSONParser().parse(request)
+    user_data = UserSerializer(user, received_data, partial=True)
+    user_data.save()
+    return JsonResponse(user_data.data)
+
+@api_view(['POST'])
 def create_user_clock(request, user_id):
     try:
         user = User.objects.get(pk=user_id)
