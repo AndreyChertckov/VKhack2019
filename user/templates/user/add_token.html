@@ -24,22 +24,19 @@
         delete params_obj['state'];
         params_obj['fields'] = 'personal';
         params_obj['v'] = '5.101';
+        params_obj['callback'] = 'sendUser'
         url = new URL('https://api.vk.com/method/users.get');
         Object.keys(params_obj).forEach(key => url.searchParams.append(key, params_obj[key]))
-        fetch(url, {
-            mode: 'no-cors',
-            credentials: 'omit',
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-            }
-        }).then((resp) => {
-            return resp.json();
-        }).then((data) => {
-            data = data['response'][0];
+        var script = document.createElement('SCRIPT');
+        script.src = url;
+        document.getElementsByTagName("head")[0].appendChild(script);
+
+        function sendUser(result) {
+            let data = result[0];
             let name = data['first_name'] + ' ' + data['second_name'];
             let alcohol = +data['personal']['alcohol'] > 3;
             let smoking = +data['personal']['personal'] > 3
-            return fetch('http://insultclock.space:8080/api/user/' + user, {
+            fetch('http://insultclock.space:8080/api/user/' + user, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -50,8 +47,8 @@
                     smoking: smoking,
                     user: user,
                 })
-            })
-        });
+            }).then(() => {});
+        }
     </script>
 </head>
 <body>
