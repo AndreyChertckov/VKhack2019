@@ -9,8 +9,6 @@ import datetime
 from django.db.models import Sum, Q
 from django.template import Template
 import math
-from urllib.request import urlopen
-import json
 import requests
 
 
@@ -79,23 +77,25 @@ def get_user(request, user_id):
     except:
         return HttpResponse(status=404)
 
-    url = 'https://api.vk.com/method/users.get?user_ids=' + \
-        user.vk_id + '&fields=personal&access_token=' + user.token + '&v=5.101'
-    received_data = requests.get(url).json()['response'][0]
-    print(received_data)
-    user.name = received_data['first_name'] + ' ' + received_data['last_name']
+    if user.token != '':
+        url = 'https://api.vk.com/method/users.get?user_ids=' + \
+            user.vk_id + '&fields=personal&access_token=' + user.token + '&v=5.101'
+        received_data = requests.get(url).json()['response'][0]
+        print(received_data)
+        user.name = received_data['first_name'] + ' ' + received_data['last_name']
 
-    if received_data['personal']['smoking'] > 3:
-        user.smoking = True
-    else:
-        user.smoking = False
+        if received_data['personal']['smoking'] > 3:
+            user.smoking = True
+        else:
+            user.smoking = False
 
-    if received_data['personal']['alcohol'] > 3:
-        user.drinking = True
-    else:
-        user.drinking = False
+        if received_data['personal']['alcohol'] > 3:
+            user.drinking = True
+        else:
+            user.drinking = False
 
-    user.save()
+        user.save()
+
     serializer = UserSerializer(User.objects.get(pk=user.pk))
 
     return JsonResponse(serializer.data)
